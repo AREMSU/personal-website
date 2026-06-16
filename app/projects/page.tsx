@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { Code2, ExternalLink, Github } from "lucide-react";
+import { Code2, ExternalLink, Terminal } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Projects | Aarnav Dahal",
@@ -59,10 +59,10 @@ export default function ProjectsPage() {
             </div>
 
             <div className="flex items-center gap-4 text-slate-400">
-              <a href={project.github} className="hover:text-white transition-colors" target="_blank" rel="noreferrer">
-                <Github className="w-5 h-5" />
+              <a href={project.github} className="hover:text-white transition-colors flex items-center gap-1" target="_blank" rel="noreferrer" title="Source Code">
+                <Terminal className="w-5 h-5" />
               </a>
-              <a href={project.link} className="hover:text-white transition-colors" target="_blank" rel="noreferrer">
+              <a href={project.link} className="hover:text-white transition-colors" target="_blank" rel="noreferrer" title="Live Site">
                 <ExternalLink className="w-5 h-5" />
               </a>
             </div>
