@@ -1,0 +1,966 @@
+From 054ec7badf54b6c64d9a2f02be7cd8723dbcf106 Mon Sep 17 00:00:00 2001
+From: AREMSU <arnavjungdahala1@gmail.com>
+Date: Sun, 21 Jun 2026 09:11:24 +0000
+Subject: [PATCH] Add structured career data layer (phase 2)
+
+- Add /data JSON files for projects, certifications, experience, education, awards
+- Add lib/types.ts with shared TypeScript interfaces
+- Add lib/data.ts with typed loaders and helpers (getFeaturedProjects, sortByRecency, etc.)
+- Refactor projects/certifications/about pages to read from data layer instead of hardcoded arrays
+---
+ app/about/page.tsx          |  40 ++++++++-----
+ app/certifications/page.tsx |  79 +++++++++++++------------
+ app/projects/page.tsx       |  93 +++++++++++++++--------------
+ data/awards.json            |   1 +
+ data/certifications.json    |  10 ++++
+ data/education.json         |  11 ++++
+ data/experience.json        |  15 +++++
+ data/projects.json          |  67 +++++++++++++++++++++
+ lib/data.ts                 |  41 +++++++++++++
+ lib/types.ts                |  57 ++++++++++++++++++
+ package-lock.json           | 114 ------------------------------------
+ 11 files changed, 318 insertions(+), 210 deletions(-)
+ create mode 100644 data/awards.json
+ create mode 100644 data/certifications.json
+ create mode 100644 data/education.json
+ create mode 100644 data/experience.json
+ create mode 100644 data/projects.json
+ create mode 100644 lib/data.ts
+ create mode 100644 lib/types.ts
+
+diff --git a/app/about/page.tsx b/app/about/page.tsx
+index 8061e3c..c2e0f2a 100644
+--- a/app/about/page.tsx
++++ b/app/about/page.tsx
+@@ -1,11 +1,16 @@
+ import { Metadata } from "next";
+ import { User, Briefcase, GraduationCap } from "lucide-react";
++import { experience, education } from "@/lib/data";
+ 
+ export const metadata: Metadata = {
+   title: "About | Aarnav Dahal",
+   description: "Learn more about Aarnav Dahal's background and experience.",
+ };
+ 
++function formatRange(start: string, end: string | null) {
++  return `${start} – ${end ?? "Present"}`;
++}
++
+ export default function AboutPage() {
+   return (
+     <div className="max-w-4xl mx-auto px-4 py-12">
+@@ -14,9 +19,10 @@ export default function AboutPage() {
+           <User className="text-primary-500" /> About Me
+         </h1>
+         <p className="text-lg text-slate-300 leading-relaxed">
+-          I am a passionate developer who enjoys blending modern design aesthetics with robust backend systems. 
+-          When I'm not coding, you can probably find me exploring the latest game releases or watching anime. 
+-          I love building custom experiences and experimenting with new technologies.
++          I am a Computer Science with AI student who enjoys blending modern design
++          aesthetics with robust backend systems. When I&apos;m not coding, you can
++          probably find me exploring astrophysics, gaming, or watching anime. I love
++          building custom experiences and experimenting with new technologies.
+         </p>
+       </div>
+ 
+@@ -26,12 +32,14 @@ export default function AboutPage() {
+             <Briefcase className="text-accent" /> Experience
+           </h2>
+           <div className="space-y-4 text-slate-400">
+-            <p>More detailed experience will be populated here from the database in Phase 2!</p>
+-            {/* Placeholder */}
+-            <div className="border-l-2 border-primary-500/50 pl-4 py-1">
+-              <h3 className="font-semibold text-slate-200">Software Engineer</h3>
+-              <p className="text-sm">Some Company • 2023 - Present</p>
+-            </div>
++            {experience.map((exp) => (
++              <div key={exp.id} className="border-l-2 border-primary-500/50 pl-4 py-1">
++                <h3 className="font-semibold text-slate-200">{exp.role}</h3>
++                <p className="text-sm">
++                  {exp.organization} • {formatRange(exp.startDate, exp.endDate)}
++                </p>
++              </div>
++            ))}
+           </div>
+         </div>
+ 
+@@ -40,12 +48,14 @@ export default function AboutPage() {
+             <GraduationCap className="text-primary-400" /> Education
+           </h2>
+           <div className="space-y-4 text-slate-400">
+-            <p>Education details will be dynamically loaded soon.</p>
+-            {/* Placeholder */}
+-            <div className="border-l-2 border-accent/50 pl-4 py-1">
+-              <h3 className="font-semibold text-slate-200">B.S. Computer Science</h3>
+-              <p className="text-sm">University Name • 2019 - 2023</p>
+-            </div>
++            {education.map((edu) => (
++              <div key={edu.id} className="border-l-2 border-accent/50 pl-4 py-1">
++                <h3 className="font-semibold text-slate-200">{edu.degree}</h3>
++                <p className="text-sm">
++                  {edu.institution} • {formatRange(edu.startDate, edu.endDate)}
++                </p>
++              </div>
++            ))}
+           </div>
+         </div>
+       </div>
+diff --git a/app/certifications/page.tsx b/app/certifications/page.tsx
+index aa69b11..0511eb8 100644
+--- a/app/certifications/page.tsx
++++ b/app/certifications/page.tsx
+@@ -1,57 +1,62 @@
+ import { Metadata } from "next";
+-import { Award, ShieldCheck } from "lucide-react";
++import { Award, ShieldCheck, Hourglass } from "lucide-react";
++import { certifications } from "@/lib/data";
+ 
+ export const metadata: Metadata = {
+   title: "Certifications | Aarnav Dahal",
+   description: "Professional certifications and achievements.",
+ };
+ 
+-const placeholderCerts = [
+-  {
+-    id: 1,
+-    title: "AWS Certified Solutions Architect – Associate",
+-    issuer: "Amazon Web Services",
+-    date: "2024",
+-    link: "#"
+-  },
+-  {
+-    id: 2,
+-    title: "Google Professional Cloud Architect",
+-    issuer: "Google Cloud",
+-    date: "2023",
+-    link: "#"
+-  }
+-];
+-
+ export default function CertificationsPage() {
+   return (
+     <div className="max-w-4xl mx-auto px-4 py-12">
+       <h1 className="text-4xl font-bold mb-8 flex items-center gap-3">
+-        <Award className="text-accent w-8 h-8" /> 
++        <Award className="text-accent w-8 h-8" />
+         Certifications
+       </h1>
+ 
+       <div className="space-y-4">
+-        {placeholderCerts.map((cert) => (
+-          <div key={cert.id} className="bg-muted/10 border border-border/50 rounded-xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:bg-muted/30 transition-colors">
+-            <div className="flex items-center gap-4">
+-              <div className="p-3 bg-primary-500/10 rounded-full text-primary-400">
+-                <ShieldCheck className="w-6 h-6" />
+-              </div>
+-              <div>
+-                <h3 className="font-bold text-lg text-slate-100">{cert.title}</h3>
+-                <p className="text-slate-400 text-sm">{cert.issuer} • {cert.date}</p>
++        {certifications.map((cert) => {
++          const inProgress = cert.status === "in-progress";
++          return (
++            <div
++              key={cert.id}
++              className="bg-muted/10 border border-border/50 rounded-xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:bg-muted/30 transition-colors"
++            >
++              <div className="flex items-center gap-4">
++                <div
++                  className={`p-3 rounded-full ${
++                    inProgress
++                      ? "bg-amber-400/10 text-amber-400"
++                      : "bg-primary-500/10 text-primary-400"
++                  }`}
++                >
++                  {inProgress ? (
++                    <Hourglass className="w-6 h-6" />
++                  ) : (
++                    <ShieldCheck className="w-6 h-6" />
++                  )}
++                </div>
++                <div>
++                  <h3 className="font-bold text-lg text-slate-100">{cert.title}</h3>
++                  <p className="text-slate-400 text-sm">
++                    {cert.issuer} •{" "}
++                    {inProgress ? "In progress" : cert.dateEarned}
++                  </p>
++                </div>
+               </div>
++
++              {!inProgress && cert.credentialUrl && (
++                <a
++                  href={cert.credentialUrl}
++                  className="mt-4 sm:mt-0 px-4 py-2 border border-border rounded-full text-sm hover:border-primary-500 hover:text-primary-400 transition-colors"
++                >
++                  Verify Badge
++                </a>
++              )}
+             </div>
+-            
+-            <a 
+-              href={cert.link} 
+-              className="mt-4 sm:mt-0 px-4 py-2 border border-border rounded-full text-sm hover:border-primary-500 hover:text-primary-400 transition-colors"
+-            >
+-              Verify Badge
+-            </a>
+-          </div>
+-        ))}
++          );
++        })}
+       </div>
+     </div>
+   );
+diff --git a/app/projects/page.tsx b/app/projects/page.tsx
+index 7e4acf0..bfcf29a 100644
+--- a/app/projects/page.tsx
++++ b/app/projects/page.tsx
+@@ -1,70 +1,75 @@
+ import { Metadata } from "next";
+ import { Code2, ExternalLink, Terminal } from "lucide-react";
++import { projects, sortByRecency } from "@/lib/data";
+ 
+ export const metadata: Metadata = {
+   title: "Projects | Aarnav Dahal",
+   description: "Showcase of my recent coding projects and experiments.",
+ };
+ 
+-const placeholderProjects = [
+-  {
+-    id: 1,
+-    title: "Personal Portfolio",
+-    description: "The website you are looking at right now! Built with Next.js, Tailwind CSS, and Framer Motion.",
+-    tags: ["Next.js", "React", "Tailwind"],
+-    github: "https://github.com/AREMSU/personal-website",
+-    link: "https://aarnavdahal.com.np"
+-  },
+-  {
+-    id: 2,
+-    title: "Secret Game Engine",
+-    description: "A custom 2D game engine built for learning purposes. Shhh, it's a secret.",
+-    tags: ["C++", "OpenGL", "GameDev"],
+-    github: "#",
+-    link: "#"
+-  },
+-  {
+-    id: 3,
+-    title: "Anime Tracker CLI",
+-    description: "Command line interface to track watched anime episodes using AniList API.",
+-    tags: ["Rust", "CLI", "API"],
+-    github: "#",
+-    link: "#"
+-  }
+-];
+-
+ export default function ProjectsPage() {
++  const sortedProjects = sortByRecency(projects);
++
+   return (
+     <div className="max-w-6xl mx-auto px-4 py-12">
+       <h1 className="text-4xl font-bold mb-8 flex items-center gap-3">
+-        <Code2 className="text-primary-500 w-8 h-8" /> 
+-        Projects 
++        <Code2 className="text-primary-500 w-8 h-8" />
++        Projects
+         <span className="text-sm font-normal text-slate-500 ml-4 border border-border px-2 py-1 rounded-full bg-muted/20">
+-          Lv. 2
++          {projects.length} total
+         </span>
+       </h1>
+-      
++
+       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+-        {placeholderProjects.map((project) => (
+-          <div key={project.id} className="group relative bg-muted/10 border border-border/50 rounded-2xl p-6 hover:border-primary-500/50 hover:bg-muted/30 transition-all">
+-            <h3 className="text-xl font-bold text-slate-100 mb-2">{project.title}</h3>
+-            <p className="text-slate-400 text-sm mb-6 h-16">{project.description}</p>
+-            
++        {sortedProjects.map((project) => (
++          <div
++            key={project.id}
++            className="group relative bg-muted/10 border border-border/50 rounded-2xl p-6 hover:border-primary-500/50 hover:bg-muted/30 transition-all"
++          >
++            <div className="flex items-start justify-between mb-2">
++              <h3 className="text-xl font-bold text-slate-100">{project.title}</h3>
++              {project.status === "in-progress" && (
++                <span className="text-[10px] uppercase tracking-wide font-mono text-amber-400 border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 rounded-full whitespace-nowrap">
++                  In progress
++                </span>
++              )}
++            </div>
++            <p className="text-slate-400 text-sm mb-6 h-16">{project.summary}</p>
++
+             <div className="flex flex-wrap gap-2 mb-6">
+-              {project.tags.map((tag) => (
+-                <span key={tag} className="text-xs font-mono bg-primary-500/10 text-primary-400 px-2 py-1 rounded">
++              {project.techStack.map((tag) => (
++                <span
++                  key={tag}
++                  className="text-xs font-mono bg-primary-500/10 text-primary-400 px-2 py-1 rounded"
++                >
+                   {tag}
+                 </span>
+               ))}
+             </div>
+ 
+             <div className="flex items-center gap-4 text-slate-400">
+-              <a href={project.github} className="hover:text-white transition-colors flex items-center gap-1" target="_blank" rel="noreferrer" title="Source Code">
+-                <Terminal className="w-5 h-5" />
+-              </a>
+-              <a href={project.link} className="hover:text-white transition-colors" target="_blank" rel="noreferrer" title="Live Site">
+-                <ExternalLink className="w-5 h-5" />
+-              </a>
++              {project.links.github && (
++                <a
++                  href={project.links.github}
++                  className="hover:text-white transition-colors flex items-center gap-1"
++                  target="_blank"
++                  rel="noreferrer"
++                  title="Source Code"
++                >
++                  <Terminal className="w-5 h-5" />
++                </a>
++              )}
++              {project.links.live && (
++                <a
++                  href={project.links.live}
++                  className="hover:text-white transition-colors"
++                  target="_blank"
++                  rel="noreferrer"
++                  title="Live Site"
++                >
++                  <ExternalLink className="w-5 h-5" />
++                </a>
++              )}
+             </div>
+           </div>
+         ))}
+diff --git a/data/awards.json b/data/awards.json
+new file mode 100644
+index 0000000..fe51488
+--- /dev/null
++++ b/data/awards.json
+@@ -0,0 +1 @@
++[]
+diff --git a/data/certifications.json b/data/certifications.json
+new file mode 100644
+index 0000000..905a22d
+--- /dev/null
++++ b/data/certifications.json
+@@ -0,0 +1,10 @@
++[
++  {
++    "id": "aws-saa-c03",
++    "title": "AWS Certified Solutions Architect – Associate (SAA-C03)",
++    "issuer": "Amazon Web Services",
++    "dateEarned": null,
++    "credentialUrl": "",
++    "status": "in-progress"
++  }
++]
+diff --git a/data/education.json b/data/education.json
+new file mode 100644
+index 0000000..1da01f4
+--- /dev/null
++++ b/data/education.json
+@@ -0,0 +1,11 @@
++[
++  {
++    "id": "bsc-cs-ai",
++    "degree": "BSc (Hons) Computer Science with Artificial Intelligence",
++    "institution": "Sunway College Nepal (affiliated with Birmingham City University)",
++    "startDate": "2025-09",
++    "endDate": null,
++    "status": "in-progress",
++    "details": "Second semester. Coursework includes Data Structures & Algorithms, AI Ethics, and the CMP4285 Innovation Project."
++  }
++]
+diff --git a/data/experience.json b/data/experience.json
+new file mode 100644
+index 0000000..613044a
+--- /dev/null
++++ b/data/experience.json
+@@ -0,0 +1,15 @@
++[
++  {
++    "id": "innovation-project",
++    "role": "AI Developer & Project Coordinator",
++    "organization": "CMP4285 Innovation Project — Sunway College Nepal",
++    "startDate": "2025-09",
++    "endDate": null,
++    "description": "Four-person capstone team building Plato, an AI-powered student dining platform. Responsible for AI feature development and overall project coordination across frontend, backend, and design.",
++    "bullets": [
++      "Coordinated a 4-person cross-functional team (frontend, backend, UI/UX)",
++      "Designed and implemented AI-driven meal recommendation and image filtering features",
++      "Produced project planning artifacts including Gantt charts, risk registers, and architecture diagrams"
++    ]
++  }
++]
+diff --git a/data/projects.json b/data/projects.json
+new file mode 100644
+index 0000000..41d2202
+--- /dev/null
++++ b/data/projects.json
+@@ -0,0 +1,67 @@
++[
++  {
++    "id": "personal-website",
++    "title": "Personal Portfolio",
++    "summary": "The website you're looking at right now.",
++    "description": "Personal career hub built with Next.js and Tailwind CSS, deployed via Cloudflare Pages. Designed to eventually auto-generate a CV/resume from a single structured data source.",
++    "role": "Solo developer",
++    "techStack": ["Next.js", "React", "Tailwind CSS", "Cloudflare Pages"],
++    "startDate": "2026-06",
++    "endDate": null,
++    "status": "in-progress",
++    "links": {
++      "github": "https://github.com/AREMSU/personal-website",
++      "live": "https://aarnavdahal.com.np",
++      "demo": ""
++    },
++    "highlights": [
++      "Deployed via Cloudflare Pages with custom domain on aarnavdahal.com.np",
++      "Static export pipeline from GitHub to Cloudflare Pages"
++    ],
++    "featured": true
++  },
++  {
++    "id": "plato",
++    "title": "Plato",
++    "summary": "AI-powered student dining and meal-booking platform.",
++    "description": "Group capstone project (CMP4285 Innovation Project) connecting students with dining hosts. Built two AI-driven features: a weighted meal recommendation engine and an image-based food filter using a Vision Transformer model.",
++    "role": "AI Developer & Project Coordinator",
++    "techStack": ["Django", "PostgreSQL", "React Native", "HuggingFace ViT", "Expo"],
++    "startDate": "2025-09",
++    "endDate": null,
++    "status": "in-progress",
++    "links": {
++      "github": "",
++      "live": "",
++      "demo": ""
++    },
++    "highlights": [
++      "Built /api/ai/recommended/ meal recommendation endpoint using a weighted scoring formula (booking velocity, rating, availability, recency)",
++      "Built /api/ai/filter-image/ using HuggingFace's google/vit-base-patch16-224 with a three-zone confidence threshold",
++      "Implemented a QA review endpoint for moderating AI-flagged content"
++    ],
++    "featured": true
++  },
++  {
++    "id": "kdtree-star-search",
++    "title": "K-D Tree Based Nearest Star and Constellation Search",
++    "summary": "Spatial-indexing benchmark project using the HYG Star Database.",
++    "description": "DSA technical report and implementation comparing brute-force vs. K-D tree nearest-neighbor search across roughly 120,000 stars, with a constellation search demo built on top.",
++    "role": "Solo developer",
++    "techStack": ["Python", "NumPy", "Jupyter", "K-D Trees"],
++    "startDate": "2026-01",
++    "endDate": "2026-05",
++    "status": "completed",
++    "links": {
++      "github": "",
++      "live": "",
++      "demo": ""
++    },
++    "highlights": [
++      "Achieved a 1776x speedup over brute force search (0.13ms vs 231.46ms average query time)",
++      "10.04MB peak memory usage with a 1.978s tree build time",
++      "Used the HYG Star Database (~120,000 stars)"
++    ],
++    "featured": true
++  }
++]
+diff --git a/lib/data.ts b/lib/data.ts
+new file mode 100644
+index 0000000..978c2c1
+--- /dev/null
++++ b/lib/data.ts
+@@ -0,0 +1,41 @@
++import projectsData from "@/data/projects.json";
++import certificationsData from "@/data/certifications.json";
++import experienceData from "@/data/experience.json";
++import educationData from "@/data/education.json";
++import awardsData from "@/data/awards.json";
++import {
++  Project,
++  Certification,
++  Experience,
++  Education,
++  Award,
++} from "@/lib/types";
++
++export const projects = projectsData as Project[];
++export const certifications = certificationsData as Certification[];
++export const experience = experienceData as Experience[];
++export const education = educationData as Education[];
++export const awards = awardsData as Award[];
++
++export function getFeaturedProjects(): Project[] {
++  return projects.filter((p) => p.featured);
++}
++
++export function getProjectById(id: string): Project | undefined {
++  return projects.find((p) => p.id === id);
++}
++
++export function getCertificationsByStatus(status: Certification["status"]): Certification[] {
++  return certifications.filter((c) => c.status === status);
++}
++
++/** Sorts items with a "YYYY-MM" startDate, most recent first. Ongoing (endDate: null) items float to the top. */
++export function sortByRecency<T extends { startDate: string; endDate: string | null }>(
++  items: T[]
++): T[] {
++  return [...items].sort((a, b) => {
++    if (a.endDate === null && b.endDate !== null) return -1;
++    if (b.endDate === null && a.endDate !== null) return 1;
++    return b.startDate.localeCompare(a.startDate);
++  });
++}
+diff --git a/lib/types.ts b/lib/types.ts
+new file mode 100644
+index 0000000..be5e145
+--- /dev/null
++++ b/lib/types.ts
+@@ -0,0 +1,57 @@
++export type ItemStatus = "completed" | "in-progress" | "planned";
++
++export interface Project {
++  id: string;
++  title: string;
++  summary: string;
++  description: string;
++  role: string;
++  techStack: string[];
++  startDate: string; // "YYYY-MM"
++  endDate: string | null;
++  status: ItemStatus;
++  links: {
++    github: string;
++    live: string;
++    demo: string;
++  };
++  highlights: string[];
++  featured: boolean;
++}
++
++export interface Certification {
++  id: string;
++  title: string;
++  issuer: string;
++  dateEarned: string | null; // "YYYY-MM"
++  credentialUrl: string;
++  status: ItemStatus;
++}
++
++export interface Experience {
++  id: string;
++  role: string;
++  organization: string;
++  startDate: string;
++  endDate: string | null;
++  description: string;
++  bullets: string[];
++}
++
++export interface Education {
++  id: string;
++  degree: string;
++  institution: string;
++  startDate: string;
++  endDate: string | null;
++  status: ItemStatus;
++  details: string;
++}
++
++export interface Award {
++  id: string;
++  title: string;
++  issuer: string;
++  date: string;
++  description: string;
++}
+diff --git a/package-lock.json b/package-lock.json
+index 1fca36b..52b98b3 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -616,9 +616,6 @@
+       "cpu": [
+         "arm"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "LGPL-3.0-or-later",
+       "optional": true,
+       "os": [
+@@ -635,9 +632,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "LGPL-3.0-or-later",
+       "optional": true,
+       "os": [
+@@ -654,9 +648,6 @@
+       "cpu": [
+         "ppc64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "LGPL-3.0-or-later",
+       "optional": true,
+       "os": [
+@@ -673,9 +664,6 @@
+       "cpu": [
+         "riscv64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "LGPL-3.0-or-later",
+       "optional": true,
+       "os": [
+@@ -692,9 +680,6 @@
+       "cpu": [
+         "s390x"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "LGPL-3.0-or-later",
+       "optional": true,
+       "os": [
+@@ -711,9 +696,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "LGPL-3.0-or-later",
+       "optional": true,
+       "os": [
+@@ -730,9 +712,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "LGPL-3.0-or-later",
+       "optional": true,
+       "os": [
+@@ -749,9 +728,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "LGPL-3.0-or-later",
+       "optional": true,
+       "os": [
+@@ -768,9 +744,6 @@
+       "cpu": [
+         "arm"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "Apache-2.0",
+       "optional": true,
+       "os": [
+@@ -793,9 +766,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "Apache-2.0",
+       "optional": true,
+       "os": [
+@@ -818,9 +788,6 @@
+       "cpu": [
+         "ppc64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "Apache-2.0",
+       "optional": true,
+       "os": [
+@@ -843,9 +810,6 @@
+       "cpu": [
+         "riscv64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "Apache-2.0",
+       "optional": true,
+       "os": [
+@@ -868,9 +832,6 @@
+       "cpu": [
+         "s390x"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "Apache-2.0",
+       "optional": true,
+       "os": [
+@@ -893,9 +854,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "Apache-2.0",
+       "optional": true,
+       "os": [
+@@ -918,9 +876,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "Apache-2.0",
+       "optional": true,
+       "os": [
+@@ -943,9 +898,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "Apache-2.0",
+       "optional": true,
+       "os": [
+@@ -1161,9 +1113,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -1180,9 +1129,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -1199,9 +1145,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -1218,9 +1161,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -1459,9 +1399,6 @@
+         "arm64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -1479,9 +1416,6 @@
+         "arm64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -1499,9 +1433,6 @@
+         "x64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -1519,9 +1450,6 @@
+         "x64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -2072,9 +2000,6 @@
+         "arm64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -2089,9 +2014,6 @@
+         "arm64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -2106,9 +2028,6 @@
+         "loong64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -2123,9 +2042,6 @@
+         "loong64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -2140,9 +2056,6 @@
+         "ppc64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -2157,9 +2070,6 @@
+         "riscv64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -2174,9 +2084,6 @@
+         "riscv64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -2191,9 +2098,6 @@
+         "s390x"
+       ],
+       "dev": true,
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -2208,9 +2112,6 @@
+         "x64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -2225,9 +2126,6 @@
+         "x64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -4947,9 +4845,6 @@
+         "arm64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MPL-2.0",
+       "optional": true,
+       "os": [
+@@ -4971,9 +4866,6 @@
+         "arm64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MPL-2.0",
+       "optional": true,
+       "os": [
+@@ -4995,9 +4887,6 @@
+         "x64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MPL-2.0",
+       "optional": true,
+       "os": [
+@@ -5019,9 +4908,6 @@
+         "x64"
+       ],
+       "dev": true,
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MPL-2.0",
+       "optional": true,
+       "os": [
+-- 
+2.43.0
+

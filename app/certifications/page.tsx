@@ -9,18 +9,11 @@ export const metadata: Metadata = {
 const placeholderCerts = [
   {
     id: 1,
-    title: "AWS Certified Solutions Architect – Associate",
-    issuer: "Amazon Web Services",
-    date: "2024",
+    title: "Work in Progress",
+    issuer: "",
+    date: "",
     link: "#"
   },
-  {
-    id: 2,
-    title: "Google Professional Cloud Architect",
-    issuer: "Google Cloud",
-    date: "2023",
-    link: "#"
-  }
 ];
 
 export default function CertificationsPage() {
