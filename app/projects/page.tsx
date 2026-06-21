@@ -12,10 +12,10 @@ export default function ProjectsPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold mb-8 flex items-center gap-3">
+      <h1 className="text-4xl font-bold mb-8 flex items-center gap-3 text-ink">
         <Code2 className="text-primary-500 w-8 h-8" />
         Projects
-        <span className="text-sm font-normal text-slate-500 ml-4 border border-border px-2 py-1 rounded-full bg-muted/20">
+        <span className="text-sm font-mono font-normal text-slate ml-4 border border-border px-2 py-1 rounded-full bg-muted">
           {projects.length} total
         </span>
       </h1>
@@ -24,34 +24,38 @@ export default function ProjectsPage() {
         {sortedProjects.map((project) => (
           <div
             key={project.id}
-            className="group relative bg-muted/10 border border-border/50 rounded-2xl p-6 hover:border-primary-500/50 hover:bg-muted/30 transition-all"
+            className="group relative bg-surface border border-border rounded-2xl p-6 hover:border-primary-500/40 hover:shadow-md transition-all"
           >
-            <div className="flex items-start justify-between mb-2">
-              <h3 className="text-xl font-bold text-slate-100">{project.title}</h3>
-              {project.status === "in-progress" && (
-                <span className="text-[10px] uppercase tracking-wide font-mono text-amber-400 border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+            <div className="flex items-start justify-between mb-2 gap-2">
+              <h3 className="text-xl font-bold text-ink">{project.title}</h3>
+              {project.status === "in-progress" ? (
+                <span className="text-[10px] uppercase tracking-wide font-mono text-accent border border-accent/30 bg-accent/10 px-2 py-0.5 rounded-full whitespace-nowrap">
                   In progress
+                </span>
+              ) : (
+                <span className="text-[10px] uppercase tracking-wide font-mono text-mint border border-mint/30 bg-mint/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+                  Completed
                 </span>
               )}
             </div>
-            <p className="text-slate-400 text-sm mb-6 h-16">{project.summary}</p>
+            <p className="text-slate text-sm mb-6 h-16">{project.summary}</p>
 
             <div className="flex flex-wrap gap-2 mb-6">
               {project.techStack.map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs font-mono bg-primary-500/10 text-primary-400 px-2 py-1 rounded"
+                  className="text-xs font-mono bg-primary-500/10 text-primary-600 px-2 py-1 rounded"
                 >
                   {tag}
                 </span>
               ))}
             </div>
 
-            <div className="flex items-center gap-4 text-slate-400">
+            <div className="flex items-center gap-4 text-slate">
               {project.links.github && (
                 <a
                   href={project.links.github}
-                  className="hover:text-white transition-colors flex items-center gap-1"
+                  className="hover:text-primary-500 transition-colors flex items-center gap-1"
                   target="_blank"
                   rel="noreferrer"
                   title="Source Code"
@@ -62,7 +66,7 @@ export default function ProjectsPage() {
               {project.links.live && (
                 <a
                   href={project.links.live}
-                  className="hover:text-white transition-colors"
+                  className="hover:text-primary-500 transition-colors"
                   target="_blank"
                   rel="noreferrer"
                   title="Live Site"

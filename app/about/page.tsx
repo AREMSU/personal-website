@@ -15,26 +15,27 @@ export default function AboutPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="mb-12">
-        <h1 className="text-4xl font-bold mb-4 flex items-center gap-3">
+        <h1 className="text-4xl font-bold mb-4 flex items-center gap-3 text-ink">
           <User className="text-primary-500" /> About Me
         </h1>
-        <p className="text-lg text-slate-300 leading-relaxed">
-          I am a Computer Science with AI student who enjoys blending modern design
-          aesthetics with robust backend systems. When I&apos;m not coding, you can
-          probably find me exploring astrophysics, gaming, or watching anime. I love
-          building custom experiences and experimenting with new technologies.
+        <p className="text-lg text-ink/80 leading-relaxed">
+          I&apos;m a Computer Science with AI student leaning into web and front-end
+          development, building clean interfaces and shipping real projects rather than
+          collecting certificates. When I&apos;m not coding, you can probably find me
+          exploring astrophysics, gaming, or watching anime. I like building things that
+          look as good as they work.
         </p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        <div className="bg-muted/20 border border-border/50 p-6 rounded-2xl">
-          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <Briefcase className="text-accent" /> Experience
+        <div className="bg-surface border border-border p-6 rounded-2xl">
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-ink">
+            <Briefcase className="text-primary-500" /> Experience
           </h2>
-          <div className="space-y-4 text-slate-400">
+          <div className="space-y-4 text-slate">
             {experience.map((exp) => (
-              <div key={exp.id} className="border-l-2 border-primary-500/50 pl-4 py-1">
-                <h3 className="font-semibold text-slate-200">{exp.role}</h3>
+              <div key={exp.id} className="border-l-2 border-primary-500/40 pl-4 py-1">
+                <h3 className="font-semibold text-ink">{exp.role}</h3>
                 <p className="text-sm">
                   {exp.organization} • {formatRange(exp.startDate, exp.endDate)}
                 </p>
@@ -43,14 +44,14 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <div className="bg-muted/20 border border-border/50 p-6 rounded-2xl">
-          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <GraduationCap className="text-primary-400" /> Education
+        <div className="bg-surface border border-border p-6 rounded-2xl">
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-ink">
+            <GraduationCap className="text-primary-500" /> Education
           </h2>
-          <div className="space-y-4 text-slate-400">
+          <div className="space-y-4 text-slate">
             {education.map((edu) => (
-              <div key={edu.id} className="border-l-2 border-accent/50 pl-4 py-1">
-                <h3 className="font-semibold text-slate-200">{edu.degree}</h3>
+              <div key={edu.id} className="border-l-2 border-accent/40 pl-4 py-1">
+                <h3 className="font-semibold text-ink">{edu.degree}</h3>
                 <p className="text-sm">
                   {edu.institution} • {formatRange(edu.startDate, edu.endDate)}
                 </p>

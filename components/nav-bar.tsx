@@ -17,8 +17,8 @@ export function NavBar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed top-0 w-full z-50 flex items-center justify-center pt-6 pb-4 px-4 bg-background/50 backdrop-blur-md border-b border-border/50">
-      <div className="flex space-x-1 sm:space-x-4 bg-muted/30 px-3 py-2 rounded-full border border-border/50 shadow-lg">
+    <nav className="fixed top-0 w-full z-50 flex items-center justify-center pt-6 pb-4 px-4 bg-background/80 backdrop-blur-md border-b border-border">
+      <div className="flex space-x-1 sm:space-x-4 bg-surface px-3 py-2 rounded-full border border-border shadow-sm">
         {navItems.map((item) => {
           const isActive = pathname === item.path;
 
@@ -27,14 +27,14 @@ export function NavBar() {
               key={item.path}
               href={item.path}
               className={cn(
-                "relative px-4 py-2 text-sm font-medium transition-colors hover:text-white",
-                isActive ? "text-white" : "text-slate-400"
+                "relative px-4 py-2 text-sm font-medium transition-colors hover:text-ink",
+                isActive ? "text-ink" : "text-slate"
               )}
             >
               {isActive && (
                 <motion.div
                   layoutId="nav-pill"
-                  className="absolute inset-0 bg-primary-500/20 border border-primary-500/50 rounded-full"
+                  className="absolute inset-0 bg-primary-500/10 border border-primary-500/40 rounded-full"
                   transition={{ type: "spring", stiffness: 380, damping: 30 }}
                 />
               )}

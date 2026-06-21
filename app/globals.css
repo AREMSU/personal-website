@@ -3,20 +3,33 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  
-  --color-primary-500: #8b5cf6; /* Violet */
-  --color-primary-400: #a78bfa;
-  --color-accent: #14b8a6; /* Teal */
-  
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-ink: var(--ink);
+  --color-slate: var(--slate);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-surface: var(--surface);
+
+  --color-primary-500: #2f5ff6; /* Cobalt - primary brand color */
+  --color-primary-400: #5b80f8;
+  --color-primary-600: #1f44c4;
+
+  --color-accent: #ff6b3d; /* Ember - reserved for hover states & easter eggs */
+  --color-mint: #16a375; /* completed/positive status accent, used sparingly */
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
 :root {
-  --background: #0f1115; /* Deep, sleek dark background */
-  --foreground: #e2e8f0; /* Crisp slate text */
-  --muted: #334155;
-  --border: #1e293b;
+  --background: #f4f5f7; /* Paper - cool light grey, not warm cream */
+  --foreground: #161a23; /* Ink - near-black charcoal */
+  --ink: #161a23;
+  --slate: #5b6472;
+  --muted: #e7e9ed;
+  --border: #dde0e6;
+  --surface: #ffffff;
 }
 
 body {
@@ -26,6 +39,10 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
 }
 
 ::selection {
