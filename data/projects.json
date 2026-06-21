@@ -1,0 +1,67 @@
+[
+  {
+    "id": "personal-website",
+    "title": "Personal Portfolio",
+    "summary": "The website you're looking at right now.",
+    "description": "Personal career hub built with Next.js and Tailwind CSS, deployed via Cloudflare Pages. Designed to eventually auto-generate a CV/resume from a single structured data source.",
+    "role": "Solo developer",
+    "techStack": ["Next.js", "React", "Tailwind CSS", "Cloudflare Pages"],
+    "startDate": "2026-06",
+    "endDate": null,
+    "status": "in-progress",
+    "links": {
+      "github": "https://github.com/AREMSU/personal-website",
+      "live": "https://aarnavdahal.com.np",
+      "demo": ""
+    },
+    "highlights": [
+      "Deployed via Cloudflare Pages with custom domain on aarnavdahal.com.np",
+      "Static export pipeline from GitHub to Cloudflare Pages"
+    ],
+    "featured": true
+  },
+  {
+    "id": "plato",
+    "title": "Plato",
+    "summary": "AI-powered student dining and meal-booking platform.",
+    "description": "Group capstone project (CMP4285 Innovation Project) connecting students with dining hosts. Built two AI-driven features: a weighted meal recommendation engine and an image-based food filter using a Vision Transformer model.",
+    "role": "AI Developer & Project Coordinator",
+    "techStack": ["Django", "PostgreSQL", "React Native", "HuggingFace ViT", "Expo"],
+    "startDate": "2025-09",
+    "endDate": null,
+    "status": "in-progress",
+    "links": {
+      "github": "",
+      "live": "",
+      "demo": ""
+    },
+    "highlights": [
+      "Built /api/ai/recommended/ meal recommendation endpoint using a weighted scoring formula (booking velocity, rating, availability, recency)",
+      "Built /api/ai/filter-image/ using HuggingFace's google/vit-base-patch16-224 with a three-zone confidence threshold",
+      "Implemented a QA review endpoint for moderating AI-flagged content"
+    ],
+    "featured": true
+  },
+  {
+    "id": "kdtree-star-search",
+    "title": "K-D Tree Based Nearest Star and Constellation Search",
+    "summary": "Spatial-indexing benchmark project using the HYG Star Database.",
+    "description": "DSA technical report and implementation comparing brute-force vs. K-D tree nearest-neighbor search across roughly 120,000 stars, with a constellation search demo built on top.",
+    "role": "Solo developer",
+    "techStack": ["Python", "NumPy", "Jupyter", "K-D Trees"],
+    "startDate": "2026-01",
+    "endDate": "2026-05",
+    "status": "completed",
+    "links": {
+      "github": "",
+      "live": "",
+      "demo": ""
+    },
+    "highlights": [
+      "Achieved a 1776x speedup over brute force search (0.13ms vs 231.46ms average query time)",
+      "10.04MB peak memory usage with a 1.978s tree build time",
+      "Used the HYG Star Database (~120,000 stars)"
+    ],
+    "featured": true
+  }
+]

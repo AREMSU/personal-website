@@ -1,10 +1,15 @@
 import { Metadata } from "next";
 import { User, Briefcase, GraduationCap } from "lucide-react";
+import { experience, education } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "About | Aarnav Dahal",
   description: "Learn more about Aarnav Dahal's background and experience.",
 };
+
+function formatRange(start: string, end: string | null) {
+  return `${start} – ${end ?? "Present"}`;
+}
 
 export default function AboutPage() {
   return (
@@ -14,9 +19,10 @@ export default function AboutPage() {
           <User className="text-primary-500" /> About Me
         </h1>
         <p className="text-lg text-slate-300 leading-relaxed">
-          I am a passionate developer who enjoys blending modern design aesthetics with robust backend systems. 
-          When I'm not coding, you can probably find me exploring the latest game releases or watching anime. 
-          I love building custom experiences and experimenting with new technologies.
+          I am a Computer Science with AI student who enjoys blending modern design
+          aesthetics with robust backend systems. When I&apos;m not coding, you can
+          probably find me exploring astrophysics, gaming, or watching anime. I love
+          building custom experiences and experimenting with new technologies.
         </p>
       </div>
 
@@ -26,12 +32,14 @@ export default function AboutPage() {
             <Briefcase className="text-accent" /> Experience
           </h2>
           <div className="space-y-4 text-slate-400">
-            <p>More detailed experience will be populated here from the database in Phase 2!</p>
-            {/* Placeholder */}
-            <div className="border-l-2 border-primary-500/50 pl-4 py-1">
-              <h3 className="font-semibold text-slate-200">Software Engineer</h3>
-              <p className="text-sm">Some Company • 2023 - Present</p>
-            </div>
+            {experience.map((exp) => (
+              <div key={exp.id} className="border-l-2 border-primary-500/50 pl-4 py-1">
+                <h3 className="font-semibold text-slate-200">{exp.role}</h3>
+                <p className="text-sm">
+                  {exp.organization} • {formatRange(exp.startDate, exp.endDate)}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -40,12 +48,14 @@ export default function AboutPage() {
             <GraduationCap className="text-primary-400" /> Education
           </h2>
           <div className="space-y-4 text-slate-400">
-            <p>Education details will be dynamically loaded soon.</p>
-            {/* Placeholder */}
-            <div className="border-l-2 border-accent/50 pl-4 py-1">
-              <h3 className="font-semibold text-slate-200">B.S. Computer Science</h3>
-              <p className="text-sm">University Name • 2019 - 2023</p>
-            </div>
+            {education.map((edu) => (
+              <div key={edu.id} className="border-l-2 border-accent/50 pl-4 py-1">
+                <h3 className="font-semibold text-slate-200">{edu.degree}</h3>
+                <p className="text-sm">
+                  {edu.institution} • {formatRange(edu.startDate, edu.endDate)}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

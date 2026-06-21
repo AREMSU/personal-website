@@ -1,0 +1,15 @@
+[
+  {
+    "id": "innovation-project",
+    "role": "AI Developer & Project Coordinator",
+    "organization": "CMP4285 Innovation Project — Sunway College Nepal",
+    "startDate": "2025-09",
+    "endDate": null,
+    "description": "Four-person capstone team building Plato, an AI-powered student dining platform. Responsible for AI feature development and overall project coordination across frontend, backend, and design.",
+    "bullets": [
+      "Coordinated a 4-person cross-functional team (frontend, backend, UI/UX)",
+      "Designed and implemented AI-driven meal recommendation and image filtering features",
+      "Produced project planning artifacts including Gantt charts, risk registers, and architecture diagrams"
+    ]
+  }
+]
